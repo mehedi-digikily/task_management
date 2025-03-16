@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_managemnt/ui/screens/register_screen.dart';
+import 'package:task_managemnt/ui/screens/onBoardingScreen/registration_screen.dart';
 
-import '../widgets/screen_background.dart';
-import 'forgot_password_verify_email_screen.dart';
+import '../../widgets/screen_background.dart';
+import 'forgot_verify_email_screen.dart';
 
 
 class LoginScreen extends StatefulWidget {

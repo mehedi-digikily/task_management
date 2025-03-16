@@ -1,21 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../widgets/screen_background.dart';
+import '../../widgets/screen_background.dart';
 import 'login_screen.dart';
 
-class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+class ResetSetNewPasswordScreen extends StatefulWidget {
+  const ResetSetNewPasswordScreen({super.key});
 
   @override
-  State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
+  State<ResetSetNewPasswordScreen> createState() => _ResetSetNewPasswordScreenState();
 }
 
-class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
   final TextEditingController _newPasswordTEController = TextEditingController();
   final TextEditingController _confirmNewPasswordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isVisible = true;
+  bool isVisible2 = true;
 
   @override
   Widget build(BuildContext context) {
@@ -56,25 +57,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     hintText: 'New Password',
                   ),
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters long.';
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _confirmNewPasswordTEController,
-                  obscureText: isVisible,
+                  obscureText: isVisible2,
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
-                          isVisible = !isVisible;
+                          isVisible2 = !isVisible2;
                         });
                       },
-                      icon: Icon(isVisible ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(isVisible2 ? Icons.visibility_off : Icons.visibility),
                     ),
                     hintText: 'Confirm New Password',
                   ),

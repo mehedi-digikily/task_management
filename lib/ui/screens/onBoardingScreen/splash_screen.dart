@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../utility/assets_path.dart';
-import '../widgets/screen_background.dart';
+import '../../utility/assets_path.dart';
+import '../../widgets/screen_background.dart';
 import 'login_screen.dart';
 
 

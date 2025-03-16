@@ -1,19 +1,22 @@
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:task_managemnt/ui/screens/onBoardingScreen/reset_set_new_password_screen.dart';
+
+import '../../widgets/screen_background.dart';
+import 'login_screen.dart';
 
 
-import '../widgets/screen_background.dart';
-import 'forgot_password_pin_verification_screen.dart';
-
-class ForgotPasswordVerifyEmailScreen extends StatefulWidget {
-  const ForgotPasswordVerifyEmailScreen({super.key});
+class ForgotPasswordPinVerificationScreen extends StatefulWidget {
+  const ForgotPasswordPinVerificationScreen({super.key});
 
   @override
-  State<ForgotPasswordVerifyEmailScreen> createState() => _ForgotPasswordVerifyEmailScreenState();
+  State<ForgotPasswordPinVerificationScreen> createState() => _ForgotPasswordPinVerificationScreenState();
 }
 
-class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEmailScreen> {
-  final TextEditingController _emailTEController = TextEditingController();
+class _ForgotPasswordPinVerificationScreenState extends State<ForgotPasswordPinVerificationScreen> {
+  final TextEditingController _pinCodeTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -29,29 +32,41 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
               children: [
                 const SizedBox(height: 80),
                 Text(
-                  'Your Email Address',
+                  'Pin Verification',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'A 6 digit verification pin will be sent to your email.',
+                  'A 6 digit verification pin has been sent to your email.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.grey
                   ),
                 ),
                 const SizedBox(height: 24),
-                TextFormField(
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _emailTEController,
-                  decoration: const InputDecoration(
-                    hintText: 'Email',
+                PinCodeTextField(
+                  length: 6,
+                  obscureText: false,
+                  animationType: AnimationType.fade,
+                  keyboardType: TextInputType.number,
+                  pinTheme: PinTheme(
+                    shape: PinCodeFieldShape.box,
+                    borderRadius: BorderRadius.circular(5),
+                    fieldHeight: 50,
+                    fieldWidth: 40,
+                    activeFillColor: Colors.white,
+                    selectedFillColor: Colors.white,
+                    inactiveFillColor: Colors.white,
                   ),
+                  animationDuration: const Duration(milliseconds: 300),
+                  backgroundColor: Colors.transparent,
+                  enableActiveFill: true,
+                  controller: _pinCodeTEController,
+                  appContext: context,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _onTapSubmitButton,
-                  child: const Icon(Icons.arrow_circle_right_outlined),
+                  child: const Text('Verify'),
                 ),
                 const SizedBox(height: 32),
                 Center(
@@ -88,19 +103,21 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
   void _onTapSubmitButton() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ForgotPasswordPinVerificationScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ResetSetNewPasswordScreen()),
     );
   }
 
   void _onTapSignInButton() {
-    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (pre) => false,
+    );
   }
 
   @override
   void dispose() {
-    _emailTEController.dispose();
+    _pinCodeTEController.dispose();
     super.dispose();
   }
 }

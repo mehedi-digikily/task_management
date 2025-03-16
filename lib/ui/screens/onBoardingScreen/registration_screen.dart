@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/screen_background.dart';
+import '../../widgets/screen_background.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
