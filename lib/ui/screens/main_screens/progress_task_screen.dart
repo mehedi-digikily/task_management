@@ -10,8 +10,8 @@ class ProgressTaskScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.separated(
-          itemBuilder: (context, index) => TaskCard(status: 'Progress',
-              color: Colors.pinkAccent
+          itemBuilder: (context, index) => TaskCard(taskStatus: TaskStatus.progress, taskName: 'Progress',
+            
           ),
           separatorBuilder: (context, index) => SizedBox(height: 8,),
           itemCount: 6,

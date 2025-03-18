@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:task_managemnt/ui/screens/onBoardingScreen/registration_screen.dart';
 
 import '../../widgets/screen_background.dart';
+import '../main_screens/main_bottom_nav_screen.dart.dart';
 import 'forgot_verify_email_screen.dart';
 
 
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: ()=> _onTapHomeButton(),
                   child: const Icon(Icons.arrow_circle_right_outlined),
                 ),
                 const SizedBox(height: 32),
@@ -113,6 +114,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _onTapHomeButton() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MainBottomNavScreen(),
+      ),
+    );
+  }
   void _onTapSignUpButton() {
     Navigator.push(
       context,

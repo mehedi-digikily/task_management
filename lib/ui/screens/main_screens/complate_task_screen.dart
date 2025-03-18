@@ -11,9 +11,7 @@ class CompleteTaskScreen extends StatelessWidget {
     return Scaffold(
       body: ListView.separated(
 
-          itemBuilder: (context, index) => TaskCard(status: 'Complete',
-              color: Colors.green
-          ),
+          itemBuilder: (context, index) => TaskCard(taskStatus: TaskStatus.completed, taskName: 'Completed', ),
           separatorBuilder: (context, index) => SizedBox(height: 8,),
           itemCount: 6,
       )

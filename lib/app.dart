@@ -37,7 +37,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
           textTheme: const TextTheme(
             titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           )),
-      home: const MainBottomNavScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

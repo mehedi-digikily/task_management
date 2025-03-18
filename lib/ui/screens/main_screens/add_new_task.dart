@@ -1,6 +1,4 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_managemnt/ui/screens/onBoardingScreen/registration_screen.dart';
 
 import '../../widgets/screen_background.dart';
 import 'main_bottom_nav_screen.dart.dart';
@@ -27,7 +25,7 @@ class _AddNewTaskState extends State<AddNewTask> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 32),
               Text(
                 'Add New Task',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -46,7 +44,7 @@ class _AddNewTaskState extends State<AddNewTask> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.emailAddress,
                 controller: _emailDescription,
-                maxLines: 8,
+                maxLines: 6,
                 decoration: const InputDecoration(
                   hintText: 'Description',
                 ),

@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 
+enum TaskStatus {
+  sNew,
+  progress,
+  completed,
+  cancelled
+}
+
 class TaskCard extends StatelessWidget {
-  final String status;
-  Color? color;
-    TaskCard({
-    super.key, required this.status, this.color,
+  const TaskCard({
+    super.key, required this.taskStatus, required this.taskName,
   });
+
+  final TaskStatus taskStatus;
+  final String taskName;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +26,10 @@ class TaskCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tittle',style: TextStyle(fontWeight: FontWeight.w600),),
+            Text(
+              'Tittle',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             Text('Description'),
             Text('Date: 16/03/2025'),
             Row(
@@ -29,19 +40,39 @@ class TaskCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                   ),
                   label: Text(
-                    status,
+                    taskName,
                     style: TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: color ?? Colors.blueAccent[400],
+                  backgroundColor:_getStatusChipColor(),
                 ),
                 const Spacer(),
-                IconButton(onPressed: (){}, icon: Icon(Icons.edit),),
-                IconButton(onPressed: (){}, icon: Icon(Icons.delete),),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.edit),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.delete),
+                ),
               ],
             )
           ],
         ),
       ),
     );
+  }
+  Color _getStatusChipColor() {
+    late Color color;
+    switch (taskStatus) {
+      case TaskStatus.sNew:
+        color = Colors.blue;
+      case TaskStatus.progress:
+        color = Colors.purple;
+      case TaskStatus.completed:
+        color = Colors.green;
+      case TaskStatus.cancelled:
+        color = Colors.red;
+    }
+    return color;
   }
 }

@@ -16,9 +16,7 @@ class NewTaskScreen extends StatelessWidget {
             ListView.separated(
               primary: false,
                 shrinkWrap: true,
-                itemBuilder: (context, index) => TaskCard(
-                  status: 'New',
-                ),
+                itemBuilder: (context, index) => TaskCard(taskStatus: TaskStatus.sNew, taskName: 'New',),
                 separatorBuilder: (context, index) => SizedBox(height: 8,),
                 itemCount: 6,
             ),
@@ -34,7 +32,7 @@ class NewTaskScreen extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SummaryCard(
               tittle: 'New',

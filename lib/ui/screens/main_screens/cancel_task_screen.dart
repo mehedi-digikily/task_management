@@ -12,8 +12,7 @@ class CancelTaskScreen extends StatelessWidget {
       body: ListView.separated(
           primary: false,
           shrinkWrap: true,
-          itemBuilder: (context, index) => TaskCard(status: 'Cancel',
-              color: Colors.red
+          itemBuilder: (context, index) => TaskCard(taskStatus: TaskStatus.cancelled, taskName: 'Cancel',
           ),
           separatorBuilder: (context, index) => SizedBox(height: 8,),
           itemCount: 6,
