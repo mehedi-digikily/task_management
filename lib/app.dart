@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_managemnt/ui/screens/main_screens/main_bottom_nav_screen.dart.dart';
+import 'package:task_managemnt/ui/screens/main_screens/profile_update_screen.dart';
 import 'package:task_managemnt/ui/screens/onBoardingScreen/splash_screen.dart';
 
 class TaskManagerApp extends StatefulWidget {
@@ -37,7 +38,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
           textTheme: const TextTheme(
             titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           )),
-      home: const SplashScreen(),
+      home: const ProfileUpdateScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
