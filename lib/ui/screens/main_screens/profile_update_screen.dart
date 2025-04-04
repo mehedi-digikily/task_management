@@ -57,44 +57,44 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    height: 50,
-                    color: Colors.white,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: GestureDetector(
-                            onTap: getImage,
-                            child: Container(
-                              width: 100,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                color: Colors.grey,
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(6),
-                                  topLeft: Radius.circular(6),
-                                ),
-                              ),
-                              child: const Text(
-                                'Photos',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 4,
-                          child: Center(
-                            child: _image == null
-                                ? const Text('Image Not Found')
-                                : Image.file(_image!),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Container(
+                  //   width: double.infinity,
+                  //   height: 50,
+                  //   color: Colors.white,
+                  //   child: Row(
+                  //     children: [
+                  //       Expanded(
+                  //         flex: 1,
+                  //         child: GestureDetector(
+                  //           onTap: getImage,
+                  //           child: Container(
+                  //             width: 100,
+                  //             alignment: Alignment.center,
+                  //             decoration: const BoxDecoration(
+                  //               color: Colors.grey,
+                  //               borderRadius: BorderRadius.only(
+                  //                 bottomLeft: Radius.circular(6),
+                  //                 topLeft: Radius.circular(6),
+                  //               ),
+                  //             ),
+                  //             child: const Text(
+                  //               'Photos',
+                  //               style: TextStyle(color: Colors.white),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       Expanded(
+                  //         flex: 4,
+                  //         child: Center(
+                  //           child: _image == null
+                  //               ? const Text('Image Not Found')
+                  //               : Image.file(_image!),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   const SizedBox(height: 8),
                   TextFormField(
                     textInputAction: TextInputAction.next,

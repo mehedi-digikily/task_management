@@ -1,7 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_managemnt/data/model/NetworkResponse.dart';
+import 'package:task_managemnt/data/service/network_client.dart';
 
+import '../../../data/utils/urls.dart';
 import '../../widgets/screen_background.dart';
+import '../../widgets/snack_bar_message.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isVisible = true;
+  bool inProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: ScreenBackground(
         child: SingleChildScrollView(
           child: Padding(
-            key: _formKey,
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
@@ -45,6 +49,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Email',
                     ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (String? value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Enter your valid email';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -53,6 +64,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'First name',
                     ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (String? value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Enter your first name';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -61,6 +79,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Last name',
                     ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (String? value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Enter your last name';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -70,6 +95,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Mobile',
                     ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (String? value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Enter your mobile number';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -77,20 +109,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordTEController,
                     decoration: InputDecoration(
                       suffixIcon: IconButton(
-                          onPressed: (){
-                            setState(() {
-                              isVisible = !isVisible;
-                            });
-                          },
-                          icon: isVisible ? Icon(Icons.visibility_off): Icon(Icons.visibility),
+                        onPressed: () {
+                          setState(() {
+                            isVisible = !isVisible;
+                          });
+                        },
+                        icon: isVisible
+                            ? Icon(Icons.visibility_off)
+                            : Icon(Icons.visibility),
                       ),
                       hintText: 'Password',
                     ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    validator: (String? value) {
+                      if (value?.isEmpty ?? true) {
+                        return 'Enter your password';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapSubmitButton,
-                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: !inProgress,
+                    replacement: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _onTapSubmitButton,
+                      child: const Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Center(
@@ -103,7 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         children: [
                           const TextSpan(
-                              text: "Already have an account? ",
+                            text: "Already have an account? ",
                           ),
                           TextSpan(
                             text: 'Sign In',
@@ -128,7 +175,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _onTapSubmitButton() {
+    if (_formKey.currentState!.validate()) {
+      _registration();
+    }
+  }
 
+  Future<void> _registration() async {
+
+    setState(() {
+      inProgress = true;
+    });
+
+    Map<String, dynamic>? body = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _mobileTEController.text.trim(),
+      "password": _passwordTEController.text,
+      "photo": "",
+    };
+
+    print("Registration Body: $body"); //
+
+    NetworkResponse response = await NetWorkClint.postRequest(url: Urls.registrationUls, body: body,);
+
+    setState(() {
+      inProgress = false;
+    });
+
+    if (response.isSuccess) {
+      snackMessage(context, 'Registration Success',);
+    } else {
+      snackMessage(context, 'Registration Fail',true);
+
+    }
   }
 
   void _onTapSignInButton() {

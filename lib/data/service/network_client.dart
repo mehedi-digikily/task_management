@@ -10,7 +10,6 @@ class NetWorkClint {
 
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
-
       Uri uri = Uri.parse(url);
       _preRequestLogger(url);
 
@@ -35,35 +34,52 @@ class NetWorkClint {
     }
   }
 
-  static Future<NetworkResponse> postRequest(
-      {required String url, Map<String, dynamic>? bodys}) async {
+  static Future<NetworkResponse> postRequest({required String url, Map<String, dynamic>? body}) async {
     try {
-      var headers = {'Content-Type': 'application/json'};
-      var body = jsonEncode(bodys);
+      final headers = {'Content-Type': 'application/json'};
       Uri uri = Uri.parse(url);
-      _preRequestLogger(url);
 
-      final Response response = await post(Uri.parse(uri as String), headers: headers, body: body,);
-      _postRequestLog(url, response..statusCode,headers: response.headers,jsonBody: response.body,);
+      print("🔹 Sending Request to: $url");
+      print("📤 Request Body (Before Encoding): $body");
+
+      final Response response = await post(
+        uri,
+        headers: headers,
+        body: jsonEncode(body ?? {}), // এখানে `null` হলে খালি object পাঠাবে
+      );
+
+      print(" Response Status Code: ${response.statusCode}");
+      print(" Response Body: ${response.body}");
+
       if (response.statusCode == 200) {
+        final decodedJson = jsonDecode(response.body);
         return NetworkResponse(
           isSuccess: true,
           statusCode: response.statusCode,
+          data: decodedJson,
         );
       } else {
         return NetworkResponse(
           isSuccess: false,
           statusCode: response.statusCode,
+          errorMessage: jsonDecode(response.body)['message'] ?? 'Unknown error',
         );
       }
     } catch (e) {
+      print(" Error in Request: $e");
       return NetworkResponse(
-          isSuccess: false, statusCode: -1, errorMessage: e.toString());
+        isSuccess: false, statusCode: -1, errorMessage: e.toString(),
+      );
     }
   }
 
-  static _preRequestLogger(String url, {Map<String, double>? body}) {
-    _logger.i('URL => $url\n' 'Body: $body');
+
+
+
+
+
+  static _preRequestLogger(String url, {Map<String, dynamic>? body}) {
+    _logger.i('URL => $url\nBody: ${jsonEncode(body)}');
   }
 
   static _postRequestLog(String url, statusCode, {Map<String, dynamic>? headers, dynamic jsonBody, dynamic errorMessage,}) {
