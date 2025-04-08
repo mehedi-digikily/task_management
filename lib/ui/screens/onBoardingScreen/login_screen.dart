@@ -1,11 +1,12 @@
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:task_managemnt/ui/screens/onBoardingScreen/registration_screen.dart';
-
+import '../../../data/service/network_client.dart';
+import '../../../data/utils/urls.dart';
 import '../../widgets/screen_background.dart';
-import '../main_screens/main_bottom_nav_screen.dart.dart';
+import '../../widgets/snack_bar_message.dart';
 import 'forgot_verify_email_screen.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isSecure = true;
+  bool inProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: ()=> _onTapHomeButton(),
-                  child: const Icon(Icons.arrow_circle_right_outlined),
+                Visibility(
+                  replacement: Center(child: CircularProgressIndicator(),),
+                  visible: !inProgress,
+                  child: ElevatedButton(
+                    onPressed: ()=> _onTapHomeButton(),
+                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 Center(
@@ -115,19 +121,32 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onTapHomeButton() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MainBottomNavScreen(),
-      ),
-    );
+    if(_formKey.currentState!.validate()){
+    _loginData();
+    }
   }
+
+  Future<void> _loginData() async{
+
+    setState(() {inProgress = true;});
+
+    Map<String, dynamic> body =  {
+      "email":_emailTEController.text.trim(),
+      "password":_passwordTEController.text,
+    };
+
+    NetworkResponse response = await NetworkClient.postRequest(url: Urls.loginUls,body: body);
+    setState(() {inProgress = false;});
+
+    if (response.isSuccess) {
+      showSnackBarMessage(context, 'LogIn Success',);
+    } else {
+      showSnackBarMessage(context, 'LogIn Fail',true);
+    }
+  }
+
   void _onTapSignUpButton() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RegisterScreen(),
-      ),
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen(),),
     );
   }
 

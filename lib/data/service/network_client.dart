@@ -1,97 +1,107 @@
+
 import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 
-import '../model/NetworkResponse.dart';
+class NetworkResponse {
+  final bool isSuccess;
+  final int statusCode;
+  final Map<String, dynamic>? data;
+  final String errorMessage;
 
-class NetWorkClint {
+  NetworkResponse({
+    required this.isSuccess,
+    required this.statusCode,
+    this.data,
+    this.errorMessage = 'Something went wrong',
+  });
+}
+
+class NetworkClient {
   static final Logger _logger = Logger();
 
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
       Uri uri = Uri.parse(url);
-      _preRequestLogger(url);
-
-      final Response response = await get(uri);
-      final decodedJson = jsonDecode(response.body);
-
-      _postRequestLog(url, response.statusCode, jsonBody: response.body,headers: response.headers,);
-
+      _preRequestLog(url);
+      Response response = await get(uri);
+      _postRequestLog(url, response.statusCode,
+          headers: response.headers, responseBody: response.body);
       if (response.statusCode == 200) {
+        final decodedJson = jsonDecode(response.body);
         return NetworkResponse(
-            isSuccess: true, statusCode: response.statusCode, data: decodedJson);
+            isSuccess: true,
+            statusCode: response.statusCode,
+            data: decodedJson);
       } else {
+        final decodedJson = jsonDecode(response.body);
+        String errorMessage = decodedJson['data'] ?? 'Something went wrong';
         return NetworkResponse(
             isSuccess: false,
             statusCode: response.statusCode,
-            errorMessage: '-1');
+            errorMessage: errorMessage);
       }
     } catch (e) {
-    _postRequestLog(url, -1);
+      _postRequestLog(url, -1);
       return NetworkResponse(
           isSuccess: false, statusCode: -1, errorMessage: e.toString());
     }
   }
 
-  static Future<NetworkResponse> postRequest({required String url, Map<String, dynamic>? body}) async {
+  static Future<NetworkResponse> postRequest(
+      {required String url, Map<String, dynamic>? body}) async {
     try {
-      final headers = {'Content-Type': 'application/json'};
       Uri uri = Uri.parse(url);
-
-      print("🔹 Sending Request to: $url");
-      print("📤 Request Body (Before Encoding): $body");
-
-      final Response response = await post(
+      _preRequestLog(url, body: body);
+      Response response = await post(
         uri,
-        headers: headers,
-        body: jsonEncode(body ?? {}), // এখানে `null` হলে খালি object পাঠাবে
+        headers: {'Content-type': 'Application/json'},
+        body: jsonEncode(body),
       );
-
-      print(" Response Status Code: ${response.statusCode}");
-      print(" Response Body: ${response.body}");
-
+      _postRequestLog(url, response.statusCode,
+          headers: response.headers, responseBody: response.body);
       if (response.statusCode == 200) {
         final decodedJson = jsonDecode(response.body);
         return NetworkResponse(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          data: decodedJson,
-        );
+            isSuccess: true,
+            statusCode: response.statusCode,
+            data: decodedJson);
       } else {
+        final decodedJson = jsonDecode(response.body);
+        String errorMessage = decodedJson['data'] ?? 'Something went wrong';
         return NetworkResponse(
-          isSuccess: false,
-          statusCode: response.statusCode,
-          errorMessage: jsonDecode(response.body)['message'] ?? 'Unknown error',
-        );
+            isSuccess: false,
+            statusCode: response.statusCode,
+            errorMessage: errorMessage);
       }
     } catch (e) {
-      print(" Error in Request: $e");
+      _postRequestLog(url, -1, errorMessage: e.toString());
       return NetworkResponse(
-        isSuccess: false, statusCode: -1, errorMessage: e.toString(),
-      );
+          isSuccess: false, statusCode: -1, errorMessage: e.toString());
     }
   }
 
-
-
-
-
-
-  static _preRequestLogger(String url, {Map<String, dynamic>? body}) {
-    _logger.i('URL => $url\nBody: ${jsonEncode(body)}');
+  static void _preRequestLog(String url, {Map<String, dynamic>? body}) {
+    _logger.i('URL => $url\n'
+        'Body: $body');
   }
 
-  static _postRequestLog(String url, statusCode, {Map<String, dynamic>? headers, dynamic jsonBody, dynamic errorMessage,}) {
-
-    if(errorMessage != null){
-      _logger.e(
-          'URL=> $url,\n StatusCode: $statusCode,\n Headers: $headers,\n JsonBody: $jsonBody,\n ErrorMessage: $errorMessage,'
-      );
-    } else{
-    _logger.i(
-        'URL=> $url,\n StatusCode: $statusCode,\n Headers: $headers,\n JsonBody: $jsonBody,\n ErrorMessage: $errorMessage,'
-    );
+  static void _postRequestLog(String url, int statusCode,
+      {Map<String, dynamic>? headers,
+        dynamic responseBody,
+        dynamic errorMessage}) {
+    if (errorMessage != null) {
+      _logger.e(''
+          'Url: $url\n'
+          'Status code: $statusCode\n'
+          'Error Message: $errorMessage');
+    } else {
+      _logger.i(''
+          'Url: $url\n'
+          'Status code: $statusCode\n'
+          'Headers: $headers\n'
+          'Response: $responseBody');
     }
   }
 }
