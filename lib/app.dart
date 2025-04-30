@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:task_managemnt/ui/screens/onBoardingScreen/login_screen.dart';
+import 'package:task_managemnt/ui/screens/onBoardingScreen/splash_screen.dart';
 
 class TaskManagerApp extends StatefulWidget {
-  const TaskManagerApp({super.key});
+   const TaskManagerApp({super.key});
+
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+
 
   @override
   State<TaskManagerApp> createState() => _TaskManagerAppState();
@@ -12,6 +16,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: TaskManagerApp.navigatorKey,
       theme: ThemeData(
           colorSchemeSeed: Colors.green,
           inputDecorationTheme: InputDecorationTheme(
@@ -36,7 +41,7 @@ class _TaskManagerAppState extends State<TaskManagerApp> {
           textTheme: const TextTheme(
             titleLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           )),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

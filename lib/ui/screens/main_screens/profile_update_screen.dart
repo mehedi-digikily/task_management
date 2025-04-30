@@ -1,9 +1,16 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:task_managemnt/data/service/network_client.dart';
+import 'package:task_managemnt/data/utils/urls.dart';
+import 'package:task_managemnt/ui/screens/main_screens/main_bottom_nav_screen';
+import 'package:task_managemnt/ui/widgets/centered_circular_progressIndicator.dart';
+import 'package:task_managemnt/ui/widgets/snack_bar_message.dart';
 import 'package:task_managemnt/ui/widgets/tm_app_bar.dart';
 
+import '../../../data/model/network_response.dart';
+import '../../controlar/auth_controlar.dart';
 import '../../widgets/screen_background.dart';
 
 class ProfileUpdateScreen extends StatefulWidget {
@@ -20,20 +27,18 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   final TextEditingController _mobileTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool isVisible = true;
+  bool isVisible = false;
+  bool inProgress = false;
+  XFile? _pickedImage;
 
-  File? _image;
-  final imagePicker = ImagePicker();
-
-  Future<void> getImage() async {
-    final pickedImage = await imagePicker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      setState(() {
-        _image = File(pickedImage.path);
-      });
-    } else {
-      print('No image selected');
-    }
+  @override
+  void initState() {
+    super.initState();
+    final user = AuthController.userModel!;
+    _emailTEController.text = user.email;
+    _firstNameTEController.text = user.firstName;
+    _lastNameTEController.text = user.lastName;
+    _mobileTEController.text = user.mobile;
   }
 
   @override
@@ -57,49 +62,13 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 24),
-                  // Container(
-                  //   width: double.infinity,
-                  //   height: 50,
-                  //   color: Colors.white,
-                  //   child: Row(
-                  //     children: [
-                  //       Expanded(
-                  //         flex: 1,
-                  //         child: GestureDetector(
-                  //           onTap: getImage,
-                  //           child: Container(
-                  //             width: 100,
-                  //             alignment: Alignment.center,
-                  //             decoration: const BoxDecoration(
-                  //               color: Colors.grey,
-                  //               borderRadius: BorderRadius.only(
-                  //                 bottomLeft: Radius.circular(6),
-                  //                 topLeft: Radius.circular(6),
-                  //               ),
-                  //             ),
-                  //             child: const Text(
-                  //               'Photos',
-                  //               style: TextStyle(color: Colors.white),
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //       Expanded(
-                  //         flex: 4,
-                  //         child: Center(
-                  //           child: _image == null
-                  //               ? const Text('Image Not Found')
-                  //               : Image.file(_image!),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
+                  _buildPhotoPickerWidget(),
                   const SizedBox(height: 8),
                   TextFormField(
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
                     controller: _emailTEController,
+                    enabled: false,
                     decoration: const InputDecoration(
                       hintText: 'Email',
                     ),
@@ -148,9 +117,13 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapSubmitButton, // Call method
-                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: inProgress == false,
+                    replacement: CenteredCircularProgressIndicator(),
+                    child: ElevatedButton(
+                      onPressed: _onTapSubmitButton, // Call method
+                      child: const Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                 ],
               ),
@@ -161,11 +134,124 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     );
   }
 
-  void _onTapSubmitButton() {
+  Widget _buildPhotoPickerWidget() {
+    return GestureDetector(
+      onTap: pickedImage,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(8)),
+        child: Row(
+          children: [
+            Container(
+              height: 50,
+              width: 80,
+              decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  )),
+              alignment: Alignment.center,
+              child: const Text(
+                'Photo',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _pickedImage?.name ?? 'Select your photo',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onTapSubmitButton() async {
     if (_formKey.currentState!.validate()) {
-      print("Form submitted");
+      await _updateProfile();
       // Handle profile update logic
     }
+  }
+
+  Future<void> _updateProfile() async {
+    setState(() {
+      inProgress = true;
+    });
+    Map<String,dynamic> requestBody = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _mobileTEController.text.trim(),
+      "photo": AuthController.userModel?.photo ?? "",
+    };
+    if (_passwordTEController.text.isNotEmpty) {
+      requestBody["password"] = _passwordTEController.text;
+    }
+    if (_pickedImage != null) {
+      List<int> image = await _pickedImage!.readAsBytes();
+      String? base64EncodeImage = base64UrlEncode(image);
+      requestBody['photo'] = base64EncodeImage;
+    }
+
+    NetworkResponse response = await NetworkClient.postRequest(
+        url: Urls.profileUpdateUrl, body: requestBody);
+    setState(() {
+      inProgress= false;
+    });
+    if (response.isSuccess) {
+      // ✅ নতুন ইউজার ডেটা তৈরি করো
+      AuthController.userModel?.firstName = _firstNameTEController.text.trim();
+      AuthController.userModel?.lastName = _lastNameTEController.text.trim();
+      AuthController.userModel?.mobile = _mobileTEController.text.trim();
+      if (_pickedImage != null) {
+        List<int> image = await _pickedImage!.readAsBytes();
+        AuthController.userModel?.photo = base64UrlEncode(image);
+      }
+      // ✅ নতুন ইউজার ডেটা আবার সেভ করো
+      await AuthController.saveUserInformation(
+        AuthController.token!, // আগের token
+        AuthController.userModel!,
+      );
+
+      if (mounted) {
+        showSnackBarMessage(context, 'information update successful');
+        _tapToMainScreen();
+      }
+    }else {
+      if(mounted){
+      showSnackBarMessage(context, '${response.errorMessage}',true);
+      }
+    }
+
+  }
+
+  Future<void> pickedImage() async {
+    final ImagePicker picker = ImagePicker();
+    XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      _pickedImage = image;
+      setState(() {});
+    }
+  }
+
+  void _tapToMainScreen() {
+    _clearTextFields();
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainBottomNavScreen(),
+        ),
+        (c) => false);
+  }
+
+  _clearTextFields() {
+    _emailTEController.clear();
+    _firstNameTEController.clear();
+    _lastNameTEController.clear();
+    _mobileTEController.clear();
   }
 
   @override

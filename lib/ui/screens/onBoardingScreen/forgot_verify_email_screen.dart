@@ -1,7 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_managemnt/data/model/network_response.dart';
+import 'package:task_managemnt/data/service/network_client.dart';
+import 'package:task_managemnt/ui/widgets/centered_circular_progressIndicator.dart';
+import 'package:task_managemnt/ui/widgets/snack_bar_message.dart';
 
-
+import '../../../data/utils/urls.dart';
 import '../../widgets/screen_background.dart';
 import 'forgot_pin_verification_screen.dart';
 
@@ -9,12 +13,15 @@ class ForgotPasswordVerifyEmailScreen extends StatefulWidget {
   const ForgotPasswordVerifyEmailScreen({super.key});
 
   @override
-  State<ForgotPasswordVerifyEmailScreen> createState() => _ForgotPasswordVerifyEmailScreenState();
+  State<ForgotPasswordVerifyEmailScreen> createState() =>
+      _ForgotPasswordVerifyEmailScreenState();
 }
 
-class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEmailScreen> {
+class _ForgotPasswordVerifyEmailScreenState
+    extends State<ForgotPasswordVerifyEmailScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool inProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +42,10 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
                 const SizedBox(height: 4),
                 Text(
                   'A 6 digit verification pin will be sent to your email.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey
-                  ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(color: Colors.grey),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
@@ -49,9 +57,13 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _onTapSubmitButton,
-                  child: const Icon(Icons.arrow_circle_right_outlined),
+                Visibility(
+                  visible: inProgress == false,
+                  replacement: CenteredCircularProgressIndicator(),
+                  child: ElevatedButton(
+                    onPressed: nextScreen,
+                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 Center(
@@ -76,7 +88,7 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -85,11 +97,38 @@ class _ForgotPasswordVerifyEmailScreenState extends State<ForgotPasswordVerifyEm
     );
   }
 
-  void _onTapSubmitButton() {
+  void nextScreen(){
+    if(_formKey.currentState!.validate()){
+      emailVerify(_emailTEController.text.trim());
+    }
+  }
+
+  Future<void> emailVerify(String email) async {
+    setState(() {
+      inProgress = true;
+    });
+    NetworkResponse response = await NetworkClient.getRequest(url: Urls.recoverVerifyEmailUrl(email),);
+    if (response.isSuccess) {
+      if(mounted){
+        showSnackBarMessage(context, 'Verification code sent to your email');
+        _onTapSubmitButton(email);
+        _emailTEController.clear();
+      }
+    } else {
+      if(mounted){
+        showSnackBarMessage(context, '${response.errorMessage}', true);
+      }
+    }
+    setState(() {
+      inProgress = false;
+    });
+  }
+
+  void _onTapSubmitButton(String email) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ForgotPasswordPinVerificationScreen(),
+        builder: (context) => ForgotPasswordPinVerificationScreen(email: email,),
       ),
     );
   }

@@ -1,11 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:task_managemnt/ui/controlar/auth_controlar.dart';
+import 'package:task_managemnt/ui/screens/onBoardingScreen/login_screen.dart';
+import 'package:task_managemnt/ui/widgets/snack_bar_message.dart';
 
 import '../screens/main_screens/profile_update_screen.dart';
 
 class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const TMAppBar({
-    super.key,this.fromProfileScreen
-  });
+  const TMAppBar({super.key, this.fromProfileScreen});
 
   final bool? fromProfileScreen;
 
@@ -13,6 +16,16 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.green,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10,top: 3,bottom: 3,right: 3),
+        child: CircleAvatar(
+          backgroundImage: _shouldShowImage(AuthController.userModel?.photo)
+              ? MemoryImage(
+                  base64Decode(AuthController.userModel?.photo ?? ''),
+                )
+              : null,
+        ),
+      ),
       title: GestureDetector(
         onTap: () {
           if (fromProfileScreen ?? false) {
@@ -22,16 +35,10 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 16,
-            ),
-            SizedBox(
-              width: 16,
-            ),
             Column(
               children: [
                 Text(
-                  'Mehedi Hasan',
+                  AuthController.userModel!.fullName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -39,14 +46,16 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 Text(
-                  'info.itsmehedi@gmail.com',
+                  AuthController.userModel?.email ?? '',
                   style: TextStyle(fontSize: 10, color: Colors.white70),
                 ),
               ],
             ),
             const Spacer(),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                _onTabLogOut(context);
+              },
               child: Icon(Icons.login_outlined),
             )
           ],
@@ -54,15 +63,30 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
+  bool _shouldShowImage(String? photo) {
+    return photo != null && photo.isNotEmpty;
+  }
   void _onTapProfileSection(BuildContext context) {
     Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ProfileUpdateScreen(),
-        ));
+        ),
+    );
+  }
+
+  void _onTabLogOut(BuildContext context) {
+    AuthController.clearUserData();
+    showSnackBarMessage(context, 'Logout Successful',);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+      (route) => false,
+    );
   }
 
   @override
-  Size get preferredSize =>  Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

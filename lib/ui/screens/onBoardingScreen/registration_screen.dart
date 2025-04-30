@@ -1,6 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_managemnt/ui/screens/onBoardingScreen/login_screen.dart';
+import '../../../data/model/network_response.dart';
 import '../../../data/service/network_client.dart';
 import '../../../data/utils/urls.dart';
 import '../../widgets/screen_background.dart';
@@ -127,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   Visibility(
                     visible: _registrationInProgress == false,
-                    replacement: CircularProgressIndicator(),
+                    replacement: Center(child: CircularProgressIndicator()),
                     child: ElevatedButton(
                       onPressed: _onTapSubmitButton,
                       child: const Icon(Icons.arrow_circle_right_outlined),
@@ -190,9 +192,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {});
     if (response.isSuccess) {
       _clearTextFields();
-      showSnackBarMessage(context, 'User registered successfully!');
+      if(mounted){
+        showSnackBarMessage(context, 'User registered successfully! please login');
+
+      }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ),
+            (route) => false,
+      );
+
     } else {
-      showSnackBarMessage(context, response.errorMessage, true);
+      if(mounted) {
+        showSnackBarMessage(context, '${response.errorMessage}', true);
+      }
     }
   }
 

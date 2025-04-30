@@ -1,18 +1,28 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_managemnt/data/model/network_response.dart';
+import 'package:task_managemnt/data/service/network_client.dart';
+import 'package:task_managemnt/ui/widgets/snack_bar_message.dart';
+import '../../../data/utils/urls.dart';
 import '../../widgets/screen_background.dart';
 import 'login_screen.dart';
 
 class ResetSetNewPasswordScreen extends StatefulWidget {
-  const ResetSetNewPasswordScreen({super.key});
+  const ResetSetNewPasswordScreen(
+      {super.key, required this.email, required this.otp});
+
+  final String email, otp;
 
   @override
-  State<ResetSetNewPasswordScreen> createState() => _ResetSetNewPasswordScreenState();
+  State<ResetSetNewPasswordScreen> createState() =>
+      _ResetSetNewPasswordScreenState();
 }
 
 class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
-  final TextEditingController _newPasswordTEController = TextEditingController();
-  final TextEditingController _confirmNewPasswordTEController = TextEditingController();
+  final TextEditingController _newPasswordTEController =
+      TextEditingController();
+  final TextEditingController _confirmNewPasswordTEController =
+      TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool isVisible = true;
@@ -38,8 +48,8 @@ class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
                 Text(
                   'Set a new password with a minimum length of 6 characters.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey,
-                  ),
+                        color: Colors.grey,
+                      ),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
@@ -53,7 +63,8 @@ class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
                           isVisible = !isVisible;
                         });
                       },
-                      icon: Icon(isVisible ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(
+                          isVisible ? Icons.visibility_off : Icons.visibility),
                     ),
                     hintText: 'New Password',
                   ),
@@ -69,7 +80,8 @@ class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
                           isVisible2 = !isVisible2;
                         });
                       },
-                      icon: Icon(isVisible2 ? Icons.visibility_off : Icons.visibility),
+                      icon: Icon(
+                          isVisible2 ? Icons.visibility_off : Icons.visibility),
                     ),
                     hintText: 'Confirm New Password',
                   ),
@@ -102,7 +114,8 @@ class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = _onTapSignInButton,
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = _onTapSignInButton,
                         ),
                       ],
                     ),
@@ -118,19 +131,49 @@ class _ResetSetNewPasswordScreenState extends State<ResetSetNewPasswordScreen> {
 
   void _onTapSubmitButton() {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (pre) => false,
-      );
+      onTapChange();
     }
+  }
+
+  Future<void> onTapChange() async {
+    NetworkResponse response = await NetworkClient.postRequest(
+        url: Urls.recoverResetPasswordUrl,
+        body: {
+          "email":widget.email,
+          "OTP": widget.otp,
+          "password":_newPasswordTEController.text.trim()
+        }
+
+    );
+    if (response.isSuccess) {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            ),
+            (predicate) => false);
+      }
+    } else {
+      if (mounted) {
+        showSnackBarMessage(context, '${response.errorMessage}', true);
+      }
+    }
+  }
+
+  void onTapChangePassword() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (pre) => false,
+    );
   }
 
   void _onTapSignInButton() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (pre) => false,
+      (pre) => false,
     );
   }
 
